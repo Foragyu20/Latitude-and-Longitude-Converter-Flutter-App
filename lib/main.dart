@@ -35,38 +35,55 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
     _mapController.move(_markerPosition, 14);
   }
 
-  String _toDMS(double value, String posDir, String negDir) {
-    final direction = value >= 0 ? posDir : negDir;
-    value = value.abs();
-    final degrees = value.floor();
-    final minutes = ((value - degrees) * 60).floor();
-    final seconds = (((value - degrees) * 60 - minutes) * 60).floor();
-    return '$degrees° $minutes\' $seconds" $direction';
-  }
 
-  void _saveCoords() async {
-    final lat = _latitudeController.text;
-    final lng = _longitudeController.text;
+void _saveCoords() async {
+  final lat = _latitudeController.text;
+  final lng = _longitudeController.text;
 
-    try {
-      final response = await http.post(
-        Uri.parse(
-            'https://192.168.100.246/PHP_api/Api.php'), // Replace with your API endpoint
-        body: {'latitude': lat, 'longitude': lng},
+  // Convert to DMS
+  final dmsLat = _toDMS(double.parse(lat), 'N', 'S');
+  final dmsLng = _toDMS(double.parse(lng), 'E', 'W');
+
+  try {
+    final response = await http.post(
+      Uri.parse('https://192.168.100.246/PHP_api/Api.php'),
+      body: {
+        'latitude': lat,
+        'longitude': lng,
+        'dms_lat': dmsLat,
+        'dms_lng': dmsLng,
+      },
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            response.statusCode == 200
+                ? 'Coordinates saved successfully!'
+                : 'Failed to save coordinates: ${response.body}',
+          ),
+        ),
       );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(response.statusCode == 200
-                  ? 'Coordinates saved successfully!'
-                  : 'Failed to save coordinates.')),
-        );
-      }
-    } catch (e) {
-      print("Error saving coordinates: $e");
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving coordinates: $e')),
+      );
     }
   }
+}
+
+String _toDMS(double value, String posDir, String negDir) {
+  final direction = value >= 0 ? posDir : negDir;
+  value = value.abs();
+  final degrees = value.floor();
+  final minutes = ((value - degrees) * 60).floor();
+  final seconds = (((value - degrees) * 60 - minutes) * 60).floor();
+  return '$degrees° $minutes\' $seconds" $direction';
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +177,7 @@ class DecimalInputField extends StatelessWidget {
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
       ],
       onChanged: (value) {
-        // Trigger UI update for validation
+      
         (context as Element).markNeedsBuild();
       },
     );
