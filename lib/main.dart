@@ -17,9 +17,9 @@ class LatLngConverterApp extends StatefulWidget {
 class LatLngConverterAppState extends State<LatLngConverterApp> {
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
-
+  final MapController _mapController = MapController();
   String _convertedCoords = '';
-  LatLng? _markerPosition;
+  LatLng _markerPosition = LatLng(14.5597, 121.0629);
 
   void _convertToDMS() {
     double latitude = double.parse(_latitudeController.text);
@@ -30,6 +30,8 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
           "${_toDMS(latitude, 'N', 'S')}, ${_toDMS(longitude, 'E', 'W')}";
       _markerPosition = LatLng(latitude, longitude);
     });
+
+    _mapController.move(_markerPosition, 14);
   }
 
   String _toDMS(double value, String posDir, String negDir) {
@@ -102,39 +104,38 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
                 child: const Text('Save to Database'),
               ),
               const SizedBox(height: 16),
-              if (_markerPosition != null)
-                Container(
-                  height: 200, // Adjust height as needed
-                  child: FlutterMap(
-                    options: MapOptions(
-                      center: _markerPosition,
-                      zoom: 14,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        subdomains: const ['a', 'b', 'c'],
-                        tileSize: 256,
-                        minZoom: 0,
-                        maxZoom: 18,
-                        backgroundColor: const Color(0xFFE0E0E0),
-                        errorTileCallback: (tile, error, stackTrace) {
-                          print("Tile load error: $error");
-                        },
-                      ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point: _markerPosition!,
-                            builder: (ctx) => const Icon(Icons.location_pin,
-                                color: Colors.red, size: 40),
-                          ),
-                        ],
-                      ),
-                    ],
+              Expanded(
+                child: FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    center: _markerPosition,
+                    zoom: 14,
                   ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      subdomains: const ['a', 'b', 'c'],
+                      tileSize: 256,
+                      minZoom: 0,
+                      maxZoom: 18,
+                      backgroundColor: const Color(0xFFE0E0E0),
+                      errorTileCallback: (tile, error, stackTrace) {
+                        print("Tile load error: $error");
+                      },
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: _markerPosition,
+                          builder: (ctx) => const Icon(Icons.location_pin,
+                              color: Colors.red, size: 40),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+              )
             ]),
           )),
     );
