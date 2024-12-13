@@ -8,35 +8,28 @@ $username = "root";
 $password = "";
 $dbname = "coordinates_db";
 
+// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
-    die(json_encode(["status" => "error", "message" => "Database connection failed: " . $conn->connect_error]));
+    die(json_encode(["status" => "error", "message" => "Database connection failed"]));
 }
 
 // Get POST data
-$latitude = $_POST['latitude'] ?? null;
-$longitude = $_POST['longitude'] ?? null;
-$dms_lat = $_POST['dms_lat'] ?? null;
-$dms_lng = $_POST['dms_lng'] ?? null;
+$latitude = $_POST['latitude'];
+$longitude = $_POST['longitude'];
+$dms_lat = $_POST['dms_lat'];
+$dms_lng = $_POST['dms_lng'];
 
-// Validate input
-if (empty($latitude) || empty($longitude) || empty($dms_lat) || empty($dms_lng)) {
-    echo json_encode(["status" => "error", "message" => "Invalid input"]);
-    exit;
-}
+// Insert into database
+$sql = "INSERT INTO coordinates (latitude, longitude, dms_lat, dms_lng) VALUES ('$latitude', '$longitude', '$dms_lat', '$dms_lng')";
 
-// Insert into database using prepared statements
-$sql = $conn->prepare("INSERT INTO coordinates (latitude, longitude, dms_lat, dms_lng) VALUES (?, ?, ?, ?)");
-$sql->bind_param("ddss", $latitude, $longitude, $dms_lat, $dms_lng);
-
-if ($sql->execute()) {
+if ($conn->query($sql) === TRUE) {
     echo json_encode(["status" => "success", "message" => "Coordinates saved successfully"]);
 } else {
-    echo json_encode(["status" => "error", "message" => "Error: " . $sql->error]);
+    echo json_encode(["status" => "error", "message" => "Error: " . $sql . " - " . $conn->error]);
 }
 
-$sql->close();
 $conn->close();
 ?>
