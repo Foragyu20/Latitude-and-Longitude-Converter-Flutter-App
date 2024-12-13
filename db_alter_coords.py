@@ -18,3 +18,7 @@ def dd_to_dms(value, pos_dir, neg_dir):
     minutes = int((value - degrees) * 60)
     seconds = round((value - degrees - minutes / 60) * 3600, 2)
     return f"{degrees}°{minutes}'{seconds}\"{direction}"
+
+# Fetch all coordinates
+cursor.execute("SELECT id, latitude, longitude FROM coordinates")
+rows = cursor.fetchall()
