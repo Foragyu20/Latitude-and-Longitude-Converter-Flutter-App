@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:http/http.dart'as http;
+import 'package:http/http.dart' as http;
+
+void main() {
+  runApp(const LatLngConverterApp());
+}
+
 class LatLngConverterApp extends StatefulWidget {
   const LatLngConverterApp({super.key});
 
@@ -21,7 +26,8 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
     double longitude = double.parse(_longitudeController.text);
 
     setState(() {
-      _convertedCoords = "${_toDMS(latitude, 'N', 'S')}, ${_toDMS(longitude, 'E', 'W')}";
+      _convertedCoords =
+          "${_toDMS(latitude, 'N', 'S')}, ${_toDMS(longitude, 'E', 'W')}";
       _markerPosition = LatLng(latitude, longitude);
     });
   }
@@ -39,15 +45,19 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
     final lat = _latitudeController.text;
     final lng = _longitudeController.text;
 
-   try {
+    try {
       final response = await http.post(
-        Uri.parse('https://example.com/save-coordinates'), // Replace with your API endpoint
+        Uri.parse(
+            'https://192.168.100.246/PHP_api/Api.php'), // Replace with your API endpoint
         body: {'latitude': lat, 'longitude': lng},
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.statusCode == 200 ? 'Coordinates saved successfully!' : 'Failed to save coordinates.')),
+          SnackBar(
+              content: Text(response.statusCode == 200
+                  ? 'Coordinates saved successfully!'
+                  : 'Failed to save coordinates.')),
         );
       }
     } catch (e) {
@@ -58,20 +68,23 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Lat/Lng Converter')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
+        appBar: AppBar(title: const Text('Lat/Lng Converter')),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(children: [
             TextField(
               controller: _latitudeController,
-              decoration: const InputDecoration(labelText: 'Latitude (Decimal Degrees)'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                  labelText: 'Latitude (Decimal Degrees)'),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
             ),
             TextField(
               controller: _longitudeController,
-              decoration: const InputDecoration(labelText: 'Longitude (Decimal Degrees)'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                  labelText: 'Longitude (Decimal Degrees)'),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -97,30 +110,30 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
                   ),
                   children: [
                     TileLayer(
-                     urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        subdomains: const ['a', 'b', 'c'],
-                        tileSize: 256,
-                        minZoom: 0,
-                        maxZoom: 18,
-                        backgroundColor: const Color(0xFFE0E0E0),
-                        errorTileCallback: (tile, error, stackTrace) {
-                          print("Tile load error: $error");
-                        },
+                      urlTemplate:
+                          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      subdomains: const ['a', 'b', 'c'],
+                      tileSize: 256,
+                      minZoom: 0,
+                      maxZoom: 18,
+                      backgroundColor: const Color(0xFFE0E0E0),
+                      errorTileCallback: (tile, error, stackTrace) {
+                        print("Tile load error: $error");
+                      },
                     ),
                     MarkerLayer(
-                      
-                        markers: [
-                          Marker(
-                            point: _markerPosition!,
-                            builder: (ctx) => const Icon(Icons.location_pin, color: Colors.red, size: 40),
-                          ),
-                        ],
-                
+                      markers: [
+                        Marker(
+                          point: _markerPosition!,
+                          builder: (ctx) => const Icon(Icons.location_pin,
+                              color: Colors.red, size: 40),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-          ],),
-                  
-        ),]
-      ),
-    ));
+          ]),
+        ));
   }
 }
