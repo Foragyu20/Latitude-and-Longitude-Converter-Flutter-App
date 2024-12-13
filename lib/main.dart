@@ -42,8 +42,13 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://192.168.100.246:443/PHP_api/Api.php'),
-        body: {'latitude': lat, 'longitude': lng},
+        Uri.parse('https://192.168.100.26/PHP_api/Api.php'),
+        body: {
+          'latitude': lat,
+          'longitude': lng,
+          'dms_lat': _toDMS(double.parse(lat), 'N', 'S'),
+          'dms_lng': _toDMS(double.parse(lng), 'E', 'W')
+        },
         headers: {
           HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
         },
@@ -59,7 +64,8 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
         );
       }
     } catch (e) {
-      print("Error saving coordinates: $e");
+      print(
+          "Error saving coordinates: $e"); // Change this to use a logger instead
     }
   }
 
