@@ -18,9 +18,28 @@ final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   
   
-  @override
+ @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(title: const Text('Lat/Lng Converter')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _latitudeController,
+              decoration: const InputDecoration(labelText: 'Latitude (Decimal Degrees)'),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            TextField(
+              controller: _longitudeController,
+              decoration: const InputDecoration(labelText: 'Longitude (Decimal Degrees)'),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-
 }
+
