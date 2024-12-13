@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
@@ -75,19 +76,13 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(children: [
-              TextField(
+              DecimalInputField(
                 controller: _latitudeController,
-                decoration: const InputDecoration(
-                    labelText: 'Latitude (Decimal Degrees)'),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                labelText: 'Latitude (Decimal Degrees)',
               ),
-              TextField(
+              DecimalInputField(
                 controller: _longitudeController,
-                decoration: const InputDecoration(
-                    labelText: 'Longitude (Decimal Degrees)'),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                labelText: 'Longitude (Decimal Degrees)',
               ),
               const SizedBox(height: 16),
               ElevatedButton(
@@ -139,5 +134,45 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
             ]),
           )),
     );
+  }
+}
+
+class DecimalInputField extends StatelessWidget {
+  final TextEditingController controller;
+  final String labelText;
+
+  const DecimalInputField({
+    super.key,
+    required this.controller,
+    required this.labelText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        errorText: _validateInput(controller.text),
+      ),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+      ],
+      onChanged: (value) {
+        // Trigger UI update for validation
+        (context as Element).markNeedsBuild();
+      },
+    );
+  }
+
+  String? _validateInput(String input) {
+    if (input.isEmpty) {
+      return 'This field cannot be empty';
+    }
+    if (double.tryParse(input) == null) {
+      return 'Enter a valid decimal number';
+    }
+    return null;
   }
 }
