@@ -67,73 +67,76 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text('Lat/Lng Converter')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(children: [
-            TextField(
-              controller: _latitudeController,
-              decoration: const InputDecoration(
-                  labelText: 'Latitude (Decimal Degrees)'),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-            ),
-            TextField(
-              controller: _longitudeController,
-              decoration: const InputDecoration(
-                  labelText: 'Longitude (Decimal Degrees)'),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _convertToDMS,
-              child: const Text('Convert Coords'),
-            ),
-            if (_convertedCoords.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text('Converted Coords: $_convertedCoords'),
+    return MaterialApp(
+      home: Scaffold(
+          appBar: AppBar(title: const Text('Lat/Lng Converter')),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(children: [
+              TextField(
+                controller: _latitudeController,
+                decoration: const InputDecoration(
+                    labelText: 'Latitude (Decimal Degrees)'),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
-            ElevatedButton(
-              onPressed: _saveCoords,
-              child: const Text('Save to Database'),
-            ),
-            const SizedBox(height: 16),
-            if (_markerPosition != null)
-              Expanded(
-                child: FlutterMap(
-                  options: MapOptions(
-                    center: _markerPosition,
-                    zoom: 14,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      subdomains: const ['a', 'b', 'c'],
-                      tileSize: 256,
-                      minZoom: 0,
-                      maxZoom: 18,
-                      backgroundColor: const Color(0xFFE0E0E0),
-                      errorTileCallback: (tile, error, stackTrace) {
-                        print("Tile load error: $error");
-                      },
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: _markerPosition!,
-                          builder: (ctx) => const Icon(Icons.location_pin,
-                              color: Colors.red, size: 40),
-                        ),
-                      ],
-                    ),
-                  ],
+              TextField(
+                controller: _longitudeController,
+                decoration: const InputDecoration(
+                    labelText: 'Longitude (Decimal Degrees)'),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _convertToDMS,
+                child: const Text('Convert Coords'),
+              ),
+              if (_convertedCoords.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text('Converted Coords: $_convertedCoords'),
                 ),
+              ElevatedButton(
+                onPressed: _saveCoords,
+                child: const Text('Save to Database'),
               ),
-          ]),
-        ));
+              const SizedBox(height: 16),
+              if (_markerPosition != null)
+                Container(
+                  height: 200, // Adjust height as needed
+                  child: FlutterMap(
+                    options: MapOptions(
+                      center: _markerPosition,
+                      zoom: 14,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        subdomains: const ['a', 'b', 'c'],
+                        tileSize: 256,
+                        minZoom: 0,
+                        maxZoom: 18,
+                        backgroundColor: const Color(0xFFE0E0E0),
+                        errorTileCallback: (tile, error, stackTrace) {
+                          print("Tile load error: $error");
+                        },
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: _markerPosition!,
+                            builder: (ctx) => const Icon(Icons.location_pin,
+                                color: Colors.red, size: 40),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+            ]),
+          )),
+    );
   }
 }
