@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import "package:http/http.dart" as http;
 
 void main() {
   runApp(const LatLngConverterApp());
@@ -35,6 +36,28 @@ void _convertToDMS() {
     return '$degrees° $minutes\' $seconds" $direction';
   }
 }
+void _saveCoords() async {
+    final lat = _latitudeController.text;
+    final lng = _longitudeController.text;
+
+    final response = await http.post(
+      Uri.parse('https://example.com/save-coordinates'), // Replace with your API endpoint
+      body: {'latitude': lat, 'longitude': lng},
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Coordinates saved successfully!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save coordinates.')),
+      );
+    }
+  }
+}
+
+
  @override
   Widget build(BuildContext context) {
     return Scaffold(
