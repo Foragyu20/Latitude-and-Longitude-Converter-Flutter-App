@@ -1,11 +1,10 @@
-import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 
 void main() {
   runApp(const LatLngConverterApp());
@@ -24,27 +23,26 @@ class LatLngConverterAppState extends State<LatLngConverterApp> {
   final MapController _mapController = MapController();
   String _convertedCoords = '';
   LatLng _markerPosition = const LatLng(14.5597, 121.0629);
+  
+  void _convertToDMS() {
+    double latitude = double.parse(_latitudeController.text);
+    double longitude = double.parse(_longitudeController.text);
 
- void _convertToDMS() {
-  double latitude = double.parse(_latitudeController.text);
-  double longitude = double.parse(_longitudeController.text);
+    setState(() {
+      _convertedCoords =
+          "${_toDMS(latitude, 'N', 'S')}, ${_toDMS(longitude, 'E', 'W')}";
+      _markerPosition = LatLng(latitude, longitude);
+    });
 
-  setState(() {
-    _convertedCoords = "${_toDMS(latitude, 'N', 'S')}, ${_toDMS(longitude, 'E', 'W')}";
-    _markerPosition = LatLng(latitude, longitude);
-  });
+    _mapController.move(_markerPosition, 14);
+  }
 
-  _mapController.move(_markerPosition, 14);
-}
-
-void _saveCoords() async {
-  final lat = _latitudeController.text;
-  final lng = _longitudeController.text;
-
-  try {
-    final response = await Future.any([
-      http.post(
-        Uri.parse('https://192.168.100.26:443/PHP_api/Api.php'),
+ void _saveCoords() async {
+    final lat = _latitudeController.text;
+    final lng = _longitudeController.text;
+    try {
+      final response = await http.post(
+        Uri.parse('https://192.168.100.26/PHP_api/Api.php'),
         body: {
           'latitude': lat,
           'longitude': lng,
@@ -52,35 +50,30 @@ void _saveCoords() async {
           'dms_lng': _toDMS(double.parse(lng), 'E', 'W')
         },
         headers: {
-          HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-      ),
-      // Timeout after 10 seconds if the request is still pending
-      Future.delayed(Duration(seconds: 10), () => throw TimeoutException("Request timed out")),
-    ]);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(response.statusCode == 200
-              ? 'Coordinates saved successfully!'
-              : 'Failed to save coordinates.'),
-        ),
       );
-    }
-  } catch (e) {
-    print("Error saving coordinates: $e");
-  }
-}
 
-String _toDMS(double value, String posDir, String negDir) {
-  final direction = value >= 0 ? posDir : negDir;
-  value = value.abs();
-  final degrees = value.floor();
-  final minutes = ((value - degrees) * 60).floor();
-  final seconds = (((value - degrees) * 60 - minutes) * 60).floor();
-  return '$degrees° $minutes\' $seconds" $direction';
-}
+      final responseData = json.decode(response.body);
+      setState(() {
+      });
+
+    } catch (e) {
+      print("Error saving coordinates: $e");
+      setState(() {
+      });
+    }
+  }
+
+  String _toDMS(double value, String posDir, String negDir) {
+    final direction = value >= 0 ? posDir : negDir;
+    value = value.abs();
+    final degrees = value.floor();
+    final minutes = ((value - degrees) * 60).floor();
+    final seconds = (((value - degrees) * 60 - minutes) * 60).floor();
+    return '$degrees° $minutes\' $seconds" $direction';
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
