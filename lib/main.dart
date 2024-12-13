@@ -15,9 +15,26 @@ class LatLngConverterApp extends StatefulWidget {
 
 class LatLngConverterAppState extends State<LatLngConverterApp> {
 final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _longitudeController = TextEditingController();
-  
-  
+final TextEditingController _longitudeController = TextEditingController();
+
+
+void _convertToDMS() {
+    double latitude = double.parse(_latitudeController.text);
+    double longitude = double.parse(_longitudeController.text);
+
+    setState(() {
+      _convertedCoords = "${_toDMS(latitude, 'N', 'S')}, ${_toDMS(longitude, 'E', 'W')}";
+      _markerPosition = LatLng(latitude, longitude);
+    })
+   String _toDMS(double value, String posDir, String negDir) {
+    final direction = value >= 0 ? posDir : negDir;
+    value = value.abs();
+    final degrees = value.floor();
+    final minutes = ((value - degrees) * 60).floor();
+    final seconds = (((value - degrees) * 60 - minutes) * 60).floor();
+    return '$degrees° $minutes\' $seconds" $direction';
+  }
+}
  @override
   Widget build(BuildContext context) {
     return Scaffold(
