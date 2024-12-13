@@ -22,3 +22,18 @@ def dd_to_dms(value, pos_dir, neg_dir):
 # Fetch all coordinates
 cursor.execute("SELECT id, latitude, longitude FROM coordinates")
 rows = cursor.fetchall()
+
+# Update each coordinate with DMS format
+for row in rows:
+    coord_id, lat, lng = row
+    dms_lat = dd_to_dms(lat, "N", "S")
+    dms_lng = dd_to_dms(lng, "E", "W")
+    cursor.execute(
+        "UPDATE coordinates SET dms_lat = %s, dms_lng = %s WHERE id = %s",
+        (dms_lat, dms_lng, coord_id)
+    )
+
+db.commit()
+print("Coordinates updated successfully!")
+cursor.close()
+db.close()
